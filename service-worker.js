@@ -1,4 +1,3 @@
-
 const CACHE_NAME = 'microwave-time-converter-v1';
 const urlsToCache = [
     './',
