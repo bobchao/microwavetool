@@ -1,13 +1,13 @@
 
 const CACHE_NAME = 'microwave-time-converter-v1';
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/app.js',
-    '/fav64.png',
-    '/mw512.png',
-    '/mw192.png',
-    '/manifest.json'
+    './',
+    './index.html',
+    './app.js',
+    './fav64.png',
+    './mw512.png',
+    './mw192.png',
+    './manifest.json'
 ];
 
 // 安裝 Service Worker 並緩存資源
