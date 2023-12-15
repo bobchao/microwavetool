@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microwave Time Converter</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/x-icon" href="fav64.png">
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+<div class="container mx-auto p-8">
+  <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <h1 class="block text-gray-700 text-xl font-bold mb-2">On the Package...</h1>
+    <div class="mb-6">
+      
+      <label class="block text-gray-700 text-sm font-bold" for="package-watt">
+        Watt
+      </label>
+      <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="package-watt" type="number" placeholder="Enter wattage" oninput="convert()">
+      <label class="block text-gray-700 text-sm font-bold mt-2" for="package-time">
+        Seconds
+      </label>
+      <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="package-time" placeholder="Enter seconds" oninput="convert()">
+    </div>
+    <h1 class="block text-gray-700 text-xl font-bold mb-2">Convert to...</h1>
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold" for="home-watt">
+         Watt
+      </label>
+      <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="home-watt" type="number" placeholder="Enter wattage to convert to" oninput="convert()">
+    </div>
+    <div class="mt-4">
+      <p id="result-text" class="text-gray-700 text-sm" style="display: none";>
+        = <span id="minutes-seconds"></span><br>
+        (which is <span id="total-seconds"></span> secs)
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.getElementById('package-watt').value = localStorage.getItem('packageWatt') || '';
+    document.getElementById('package-time').value = localStorage.getItem('packageTime') || '';
+    document.getElementById('home-watt').value = localStorage.getItem('homeWatt') || '';
+    convert();
+
+    function convert() {
+        const packageWattInput = document.getElementById('package-watt').value;
+        const packageTimeInput = document.getElementById('package-time').value;
+        const homeWattInput = document.getElementById('home-watt').value;
+        const resultText = document.getElementById('result-text');
+
+        const minutesSeconds = document.getElementById('minutes-seconds');
+        const totalSeconds = document.getElementById('total-seconds');
+
+        if (packageWattInput && packageTimeInput && homeWattInput) {
+            // Perform the conversion based on the input and output wattage
+            const inputWattage = parseInt(packageWattInput);
+            const outputWattage = parseInt(homeWattInput);
+            const inputSeconds = parseInt(packageTimeInput);
+            const convertedSeconds = Math.round((inputWattage * inputSeconds) / outputWattage);
+
+            // Convert seconds to minutes and seconds for display
+            const mins = Math.floor(convertedSeconds / 60);
+            const secs = convertedSeconds % 60;
+            minutesSeconds.textContent = `${mins} min ${secs} secs`;
+            totalSeconds.textContent = `${convertedSeconds}`;
+
+            localStorage.setItem('packageWatt', packageWattInput);
+            localStorage.setItem('packageTime', packageTimeInput);
+            localStorage.setItem('homeWatt', homeWattInput);
+
+            // Show the result text
+            resultText.style.display = 'block';
+        } else {
+            // Hide the result text if any field is empty
+            resultText.style.display = 'none';
+        }
+  }
+</script>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/service-worker.js')
+            .then(function(registration) {
+                console.log('Service Worker Registered!', registration);
+            })
+            .catch(function(error) {
+                console.log('Service Worker Registration Failed!', error);
+            });
+        });
+    }
+</script>
+</body>
+</html>
