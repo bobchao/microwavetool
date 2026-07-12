@@ -7,7 +7,6 @@
     const STATUS_HIDE_MS = 8000;
 
     const cameraButton = document.getElementById('ocr-camera-btn');
-    const pickButton = document.getElementById('ocr-pick-btn');
     const cameraInput = document.getElementById('ocr-camera-input');
     const fileInput = document.getElementById('ocr-file');
     const statusEl = document.getElementById('ocr-status');
@@ -16,6 +15,19 @@
 
     let workerPromise = null;
     let statusTimer = null;
+
+    // Camera-first with file-picker fallback: when the device reports no
+    // camera (e.g. a desktop without a webcam) the button opens the file
+    // picker instead. enumerateDevices needs no permission for this — device
+    // kinds are listed even before any camera prompt. Checked up front so the
+    // click handler stays synchronous and keeps its user-activation; while
+    // still unknown we default to trying the camera.
+    let hasCamera = null;
+    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+        navigator.mediaDevices.enumerateDevices()
+            .then(devices => { hasCamera = devices.some(d => d.kind === 'videoinput'); })
+            .catch(() => {});
+    }
 
     function setStatus(kind, message) {
         clearTimeout(statusTimer);
@@ -106,7 +118,6 @@
 
     function setBusy(busy) {
         cameraButton.disabled = busy;
-        pickButton.disabled = busy;
     }
 
     async function scan(file) {
@@ -137,8 +148,9 @@
         }
     }
 
-    cameraButton.addEventListener('click', () => cameraInput.click());
-    pickButton.addEventListener('click', () => fileInput.click());
+    cameraButton.addEventListener('click', () => {
+        (hasCamera === false ? fileInput : cameraInput).click();
+    });
     [cameraInput, fileInput].forEach(input => {
         input.addEventListener('change', () => {
             if (input.files && input.files[0]) {

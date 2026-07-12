@@ -23,15 +23,14 @@
         Seconds
       </label>
       <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="package-time" placeholder="Enter seconds" oninput="convert()">
-      <button id="ocr-camera-btn" type="button" class="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+      <!-- Full-width and tall so the button is an easy thumb target for
+           either hand on a phone. -->
+      <button id="ocr-camera-btn" type="button" class="w-full mt-1 bg-blue-500 hover:bg-blue-700 text-white text-base font-bold py-4 px-4 rounded focus:outline-none focus:shadow-outline">
         📷 Take photo
       </button>
-      <button id="ocr-pick-btn" type="button" class="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-        🖼️ Choose photo
-      </button>
-      <!-- Two inputs because no single one covers both sources on both
-           platforms: Android's photo picker offers no camera option without
-           capture, while capture locks iOS to camera-only. -->
+      <!-- Camera-first: the capture input opens the camera directly. The
+           plain input is the fallback when no camera device is available
+           (desktop browsers ignore capture and show a file dialog anyway). -->
       <input type="file" id="ocr-camera-input" accept="image/*" capture="environment" class="hidden">
       <input type="file" id="ocr-file" accept="image/*" class="hidden">
       <p id="ocr-status" class="text-sm mt-2" style="display: none;"></p>
