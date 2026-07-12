@@ -6,7 +6,9 @@
     const VENDOR = 'ocr/vendor';
     const STATUS_HIDE_MS = 8000;
 
-    const scanButton = document.getElementById('ocr-scan');
+    const cameraButton = document.getElementById('ocr-camera-btn');
+    const pickButton = document.getElementById('ocr-pick-btn');
+    const cameraInput = document.getElementById('ocr-camera-input');
     const fileInput = document.getElementById('ocr-file');
     const statusEl = document.getElementById('ocr-status');
     const wattField = document.getElementById('package-watt');
@@ -102,8 +104,13 @@
         }
     }
 
+    function setBusy(busy) {
+        cameraButton.disabled = busy;
+        pickButton.disabled = busy;
+    }
+
     async function scan(file) {
-        scanButton.disabled = true;
+        setBusy(true);
         setStatus('busy', 'Reading photo… first use downloads the OCR engine (~8 MB), later scans are faster.');
         try {
             const worker = await getWorker();
@@ -126,16 +133,19 @@
             console.error('[OCR] failed:', err);
             setStatus('error', '✗ Scanning failed — check your connection and try again, or enter the values manually.');
         } finally {
-            scanButton.disabled = false;
+            setBusy(false);
         }
     }
 
-    scanButton.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', () => {
-        if (fileInput.files && fileInput.files[0]) {
-            scan(fileInput.files[0]);
-        }
-        // Allow re-selecting the same photo (e.g. after a failed scan).
-        fileInput.value = '';
+    cameraButton.addEventListener('click', () => cameraInput.click());
+    pickButton.addEventListener('click', () => fileInput.click());
+    [cameraInput, fileInput].forEach(input => {
+        input.addEventListener('change', () => {
+            if (input.files && input.files[0]) {
+                scan(input.files[0]);
+            }
+            // Allow re-selecting the same photo (e.g. after a failed scan).
+            input.value = '';
+        });
     });
 })();
