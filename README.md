@@ -10,6 +10,7 @@ Almost all the code and icon created with following service + a few copy/paste w
 
 ## Features
 - **Time Conversion**: Input the wattage and time instructions from the food package and the wattage of your microwave oven to get the adjusted cooking time.
+- **Scan Package Photo (OCR)**: Tap "📷 Take photo" to shoot the package's microwave instructions (on devices without a camera it falls back to a file picker) and have the wattage and time filled in automatically. Minutes are converted to seconds for you; when a package lists several wattage variants the first one is used. Recognition runs entirely in your browser with [Tesseract.js](https://github.com/naptha/tesseract.js) — the photo is never uploaded anywhere. The OCR engine and language data (English + Traditional Chinese, which also covers the 分/秒 glyphs on Japanese packaging, ~8 MB) are served with the app and downloaded only on first use, then cached for offline use.
 - **Save Preferences**: Your last used settings (package wattage and microwave oven wattage) are saved for quick reference on your next visit.
 - **Progressive Web App (PWA)**: Install this app on your home screen and use it offline. The PWA technology ensures a smooth and native-like experience.
 
@@ -26,6 +27,11 @@ This web application can be used directly from a web browser without any install
 2. **Enter the Package Time**: This is the recommended cooking time on the package.
 3. **Enter Your Microwave Wattage**: The wattage of the microwave oven you are using.
 4. **Result**: The app will display the converted time in minutes and seconds.
+
+## Development
+- `ocr/mw-parse.js` extracts wattage/time pairs from OCR text and is unit-tested: run `node test/mw-parse.test.js`.
+- `ocr/ocr.js` wires the scan button to Tesseract.js (lazy-loaded on first use). Raw OCR text and every extracted value are written to the browser console for debugging.
+- `ocr/vendor/` contains the self-hosted Tesseract.js v5.1.1 assets (`tesseract.min.js`, `worker.min.js`, LSTM wasm cores, and `4.0.0_best_int` traineddata for `eng` + `chi_tra`).
 
 ## Contributing
 Feel free to fork this repository and submit pull requests to contribute to this project. For major changes, please open an issue first to discuss what you would like to change.
