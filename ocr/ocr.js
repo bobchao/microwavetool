@@ -45,6 +45,27 @@
         }
     }
 
+    // Step-by-step progress in the status line. On phones there is no console
+    // to look at, so this is the only way to see where a scan stalls (engine
+    // download vs. recognition).
+    const PROGRESS_LABELS = {
+        'loading tesseract core': 'Loading OCR engine',
+        'initializing tesseract': 'Starting OCR engine',
+        'loading language traineddata': 'Downloading language data',
+        'initializing api': 'Preparing recognition',
+        'recognizing text': 'Reading text'
+    };
+
+    function reportProgress(m) {
+        if (!m || !m.status) return;
+        const label = PROGRESS_LABELS[m.status];
+        if (!label) return;
+        const pct = typeof m.progress === 'number' && m.progress > 0 && m.progress < 1
+            ? ' ' + Math.round(m.progress * 100) + '%'
+            : '';
+        setStatus('busy', label + pct + '…');
+    }
+
     function loadScript(src) {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
@@ -66,7 +87,8 @@
                 return Tesseract.createWorker(['eng', 'chi_tra'], 1, {
                     workerPath: VENDOR + '/worker.min.js',
                     corePath: VENDOR,
-                    langPath: VENDOR + '/lang'
+                    langPath: VENDOR + '/lang',
+                    logger: reportProgress
                 });
             })().catch(err => {
                 workerPromise = null;
@@ -122,7 +144,7 @@
 
     async function scan(file) {
         setBusy(true);
-        setStatus('busy', 'Reading photo… first use downloads the OCR engine (~8 MB), later scans are faster.');
+        setStatus('busy', 'Photo received (' + Math.round(file.size / 1024) + ' KB) — starting OCR… first use downloads the engine (~8 MB).');
         try {
             const worker = await getWorker();
             const image = await toRecognizable(file);
@@ -147,6 +169,16 @@
             setBusy(false);
         }
     }
+
+    // Phones have no devtools console, so surface unexpected errors in the
+    // status line where the user (and bug reports) can see them.
+    window.addEventListener('error', e => {
+        setStatus('error', '✗ Unexpected error: ' + e.message);
+    });
+    window.addEventListener('unhandledrejection', e => {
+        const reason = e.reason && e.reason.message ? e.reason.message : String(e.reason);
+        setStatus('error', '✗ Unexpected error: ' + reason);
+    });
 
     cameraButton.addEventListener('click', () => {
         (hasCamera === false ? fileInput : cameraInput).click();
