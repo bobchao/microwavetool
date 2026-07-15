@@ -20,6 +20,7 @@
         pkgMin: document.getElementById('pkg-min'),
         pkgSec: document.getElementById('pkg-sec'),
         scanBtn: document.getElementById('scan-btn'),
+        pickBtn: document.getElementById('pick-btn'),
         cameraInput: document.getElementById('ocr-camera-input'),
         fileInput: document.getElementById('ocr-file'),
         scanningOverlay: document.getElementById('scanning-overlay'),
@@ -226,22 +227,15 @@
     });
 
     // --- Scan ---
-    // Camera-first with file-picker fallback: when the device reports no
-    // camera (e.g. a desktop without a webcam) the button opens the file
-    // picker instead. enumerateDevices needs no permission for this — device
-    // kinds are listed even before any camera prompt. Checked up front so the
-    // click handler stays synchronous and keeps its user-activation; while
-    // still unknown we default to trying the camera.
-    let hasCamera = null;
-    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
-        navigator.mediaDevices.enumerateDevices()
-            .then(devices => { hasCamera = devices.some(d => d.kind === 'videoinput'); })
-            .catch(() => {});
-    }
-
-    els.scanBtn.addEventListener('click', () => {
-        (hasCamera === false ? els.fileInput : els.cameraInput).click();
-    });
+    // Two inputs, two buttons, no camera-detection heuristic: an earlier
+    // version guessed camera availability via enumerateDevices() and routed
+    // the single scan button to whichever input matched, but that call can
+    // under-report (e.g. before the user has ever granted permission),
+    // permanently misrouting the button to the file picker with no way back
+    // to the camera. The capture input is only ever reachable through its
+    // own button now, so it can't be locked out by a bad guess.
+    els.scanBtn.addEventListener('click', () => els.cameraInput.click());
+    els.pickBtn.addEventListener('click', () => els.fileInput.click());
     [els.cameraInput, els.fileInput].forEach(input => {
         input.addEventListener('change', () => {
             const file = input.files && input.files[0];
@@ -253,6 +247,7 @@
     function setScanning(active) {
         els.scanningOverlay.classList.toggle('hidden', !active);
         els.scanBtn.disabled = active;
+        els.pickBtn.disabled = active;
         if (active) els.scanningSubtitle.textContent = 'Recognising text — right here on your phone';
     }
 

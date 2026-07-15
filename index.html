@@ -90,9 +90,18 @@
         <svg viewBox="0 0 24 24" width="24" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5a2 2 0 0 1 2-2h1.7l.9-1.6a1 1 0 0 1 .87-.5h5.06a1 1 0 0 1 .87.5l.9 1.6H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><circle cx="12" cy="12.6" r="3.4"></circle></svg>
         <span class="font-black text-[17px] text-white">Scan the package</span>
       </button>
-      <!-- Camera-first: the capture input opens the camera directly. The
-           plain input is the fallback when no camera device is available
-           (desktop browsers ignore capture and show a file dialog anyway). -->
+      <button id="pick-btn" type="button" class="w-full mt-2 text-center font-semibold text-[11.5px] text-[#a89a86] disabled:opacity-60">
+        or choose a photo from your library
+      </button>
+      <!-- Two inputs because no single one reliably covers both sources on
+           both platforms: Android's system photo picker offers no camera
+           option for a plain accept="image/*" input, while capture locks iOS
+           Safari to camera-only. The scan button always targets the capture
+           input directly (no camera-detection heuristic — enumerateDevices()
+           can under-report before permission is granted, which previously
+           left users stuck on the file picker with no way back to the
+           camera); the secondary link is the explicit, always-available way
+           to pick an existing photo instead. -->
       <input type="file" id="ocr-camera-input" accept="image/*" capture="environment" class="hidden">
       <input type="file" id="ocr-file" accept="image/*" class="hidden">
     </div>
