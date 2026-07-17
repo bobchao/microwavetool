@@ -236,6 +236,9 @@
     // own button now, so it can't be locked out by a bad guess.
     els.scanBtn.addEventListener('click', () => els.cameraInput.click());
     els.pickBtn.addEventListener('click', () => els.fileInput.click());
+    // Tapping the first-entry empty state does the same as "Scan the package".
+    // It's only visible/clickable before a result exists (render() hides it).
+    els.emptyState.addEventListener('click', () => els.cameraInput.click());
     [els.cameraInput, els.fileInput].forEach(input => {
         input.addEventListener('change', () => {
             const file = input.files && input.files[0];
