@@ -5,6 +5,119 @@
     const STORAGE_KEY = 'mw.state.v2';
     const OVEN_PRESETS = [600, 700, 800, 900, 1000, 1100];
 
+    // --- Internationalisation -------------------------------------------------
+    // Language options: 'default' (follow the browser, falling back to English
+    // when no supported language matches), 'en', and 'zh-Hant'. The choice is
+    // persisted alongside the rest of the state so it survives reloads.
+    const SUPPORTED_LANGS = ['en', 'zh-Hant'];
+    const LANG_OPTIONS = ['default', 'en', 'zh-Hant'];
+
+    const I18N = {
+        en: {
+            title: 'Heat it right — Microwave Time Converter',
+            appTitle: 'Heat it right',
+            yourOven: 'your oven',
+            scanAlt: 'Scan a package with your camera',
+            cookFor: 'Cook for',
+            cookForEstimate: 'Cook for · estimate',
+            emptyTitle: 'Cook it for the right time',
+            emptySubtitle: 'Scan the package or enter it below',
+            estimateWarning: "Couldn't read the package power, so I assumed 700 W — typical for a home meal. Change it below if yours is different.",
+            lastCooks: 'Last 2 cooks',
+            fromPackage: 'From the package',
+            typeOrScan: 'type or scan',
+            power: 'Power',
+            powerAssumed: 'Power · assumed',
+            cookTime: 'Cook time',
+            sec: 'sec',
+            scanPackage: 'Scan the package',
+            chooseFromLibrary: 'or choose a photo from your library',
+            readingLabel: 'Reading the label…',
+            recognising: 'Recognising text — right here on your phone',
+            settings: 'Settings',
+            ovenPower: "Your microwave's power",
+            ovenPowerDesc: "Most home microwaves are 600–800 W — it's printed inside the door or on the back.",
+            custom: 'Custom',
+            language: 'Interface language',
+            languageDesc: '“Default” follows your browser; if it isn’t supported, English is used.',
+            langDefault: 'Default',
+            langEn: 'English',
+            langZhHant: '繁體中文',
+            save: 'Save',
+            reuse: 'Reuse',
+            doubleCheck: 'double-check the package power below',
+            exactly: t => `exactly ${t} · rounded to the nearest 10s`,
+            recentLine: (pw, time, oven) => `${pw} W · ${time} → your ${oven} W`
+        },
+        'zh-Hant': {
+            title: '加熱剛剛好 — 微波時間換算',
+            appTitle: '加熱剛剛好',
+            yourOven: '你的微波爐',
+            scanAlt: '用相機掃描包裝',
+            cookFor: '加熱時間',
+            cookForEstimate: '加熱時間 · 估算',
+            emptyTitle: '用剛剛好的時間加熱',
+            emptySubtitle: '掃描包裝，或在下方輸入',
+            estimateWarning: '讀不到包裝上的瓦數，所以先以 700 W 估算——這是家庭餐點常見的功率。如果你的不同，請在下方修改。',
+            lastCooks: '最近 2 次加熱',
+            fromPackage: '包裝上的資訊',
+            typeOrScan: '輸入或掃描',
+            power: '功率',
+            powerAssumed: '功率 · 估算',
+            cookTime: '加熱時間',
+            sec: '秒',
+            scanPackage: '掃描包裝',
+            chooseFromLibrary: '或從相簿選一張照片',
+            readingLabel: '正在讀取標籤…',
+            recognising: '正在辨識文字——就在你的手機上',
+            settings: '設定',
+            ovenPower: '你的微波爐功率',
+            ovenPowerDesc: '大多數家用微波爐為 600–800 W——通常印在門內側或機身背面。',
+            custom: '自訂',
+            language: '介面語言',
+            languageDesc: '「預設」會依照瀏覽器語言；若不支援，則使用英文。',
+            langDefault: '預設',
+            langEn: 'English',
+            langZhHant: '繁體中文',
+            save: '儲存',
+            reuse: '再用一次',
+            doubleCheck: '請再確認下方的包裝瓦數',
+            exactly: t => `精確為 ${t} · 已四捨五入至最接近的 10 秒`,
+            recentLine: (pw, time, oven) => `${pw} W · ${time} → 你的 ${oven} W`
+        }
+    };
+
+    // Map a stored language preference to an actual translation table key.
+    // 'default' inspects the browser's preferred languages and picks Traditional
+    // Chinese for any zh preference, otherwise English.
+    function resolveLang(pref) {
+        if (SUPPORTED_LANGS.indexOf(pref) !== -1) return pref;
+        const prefs = navigator.languages && navigator.languages.length
+            ? navigator.languages
+            : [navigator.language || 'en'];
+        for (const l of prefs) {
+            if (l && l.toLowerCase().indexOf('zh') === 0) return 'zh-Hant';
+        }
+        return 'en';
+    }
+
+    function t(key) {
+        return I18N[resolveLang(state.lang)][key];
+    }
+
+    function applyStaticI18n() {
+        const dict = I18N[resolveLang(state.lang)];
+        document.documentElement.lang = resolveLang(state.lang) === 'zh-Hant' ? 'zh-Hant' : 'en';
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const val = dict[el.getAttribute('data-i18n')];
+            if (typeof val === 'string') el.textContent = val;
+        });
+        document.querySelectorAll('[data-i18n-alt]').forEach(el => {
+            const val = dict[el.getAttribute('data-i18n-alt')];
+            if (typeof val === 'string') el.setAttribute('alt', val);
+        });
+    }
+
     const els = {
         ovenChipValue: document.getElementById('oven-chip-value'),
         resultCard: document.getElementById('result-card'),
@@ -30,7 +143,8 @@
         ovenSheet: document.getElementById('oven-sheet'),
         ovenChips: document.getElementById('oven-chips'),
         ovenCustomInput: document.getElementById('oven-custom-input'),
-        ovenSaveBtn: document.getElementById('oven-save-btn')
+        ovenSaveBtn: document.getElementById('oven-save-btn'),
+        langChips: document.getElementById('lang-chips')
     };
 
     function loadState() {
@@ -40,6 +154,7 @@
                 const parsed = JSON.parse(raw);
                 return {
                     oven: parsed.oven || '700',
+                    lang: LANG_OPTIONS.indexOf(parsed.lang) !== -1 ? parsed.lang : 'default',
                     pkgWatt: parsed.pkgWatt || '',
                     min: parsed.min || '',
                     sec: parsed.sec || '',
@@ -53,6 +168,7 @@
         const legacySeconds = parseInt(localStorage.getItem('packageTime')) || 0;
         return {
             oven: legacyOven || '700',
+            lang: 'default',
             pkgWatt: legacyWatt || '',
             min: legacySeconds ? String(Math.floor(legacySeconds / 60)) : '',
             sec: legacySeconds ? String(legacySeconds % 60) : '',
@@ -65,7 +181,7 @@
 
     function saveState() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
-            oven: state.oven, pkgWatt: state.pkgWatt, min: state.min, sec: state.sec, recents: state.recents
+            oven: state.oven, lang: state.lang, pkgWatt: state.pkgWatt, min: state.min, sec: state.sec, recents: state.recents
         }));
     }
 
@@ -100,15 +216,15 @@
         els.resultCard.classList.toggle('hidden', !c.can);
         els.emptyState.classList.toggle('hidden', c.can);
         if (c.can) {
-            els.resultLabel.textContent = state.isEstimate ? 'Cook for · estimate' : 'Cook for';
+            els.resultLabel.textContent = state.isEstimate ? t('cookForEstimate') : t('cookFor');
             els.resultTime.textContent = fmt(c.friendly);
             els.resultCaption.textContent = state.isEstimate
-                ? 'double-check the package power below'
-                : `exactly ${fmt(c.exact)} · rounded to the nearest 10s`;
+                ? t('doubleCheck')
+                : t('exactly')(fmt(c.exact));
         }
 
         els.estimateWarning.classList.toggle('hidden', !state.isEstimate);
-        els.powerRowLabel.textContent = state.isEstimate ? 'Power · assumed' : 'Power';
+        els.powerRowLabel.textContent = state.isEstimate ? t('powerAssumed') : t('power');
 
         // Skip re-writing the field the user is actively typing in, so the
         // cursor doesn't jump around.
@@ -127,12 +243,15 @@
             const row = document.createElement('button');
             row.type = 'button';
             row.className = 'w-full bg-white border-[1.5px] border-[#e6dac6] rounded-[14px] px-[14px] py-[11px] flex items-center justify-between mb-[9px]';
+            const line = t('recentLine')(r.pw, r.mm + ':' + String(r.ss).padStart(2, '0'), r.oven);
             row.innerHTML =
                 '<div class="text-left">' +
-                    '<div class="font-semibold text-[11.5px] text-[#8a7d6c] mb-0.5">' + r.pw + ' W · ' + r.mm + ':' + String(r.ss).padStart(2, '0') + ' → your ' + r.oven + ' W</div>' +
+                    '<div class="font-semibold text-[11.5px] text-[#8a7d6c] mb-0.5"></div>' +
                     '<div class="font-black text-[19px] text-[#2e2620]">' + (rc.can ? fmt(rc.friendly) : '—') + '</div>' +
                 '</div>' +
-                '<span class="font-extrabold text-xs text-white bg-[#d97a2b] rounded-xl px-[13px] py-2">Reuse</span>';
+                '<span class="font-extrabold text-xs text-white bg-[#d97a2b] rounded-xl px-[13px] py-2"></span>';
+            row.querySelector('.text-left > div:first-child').textContent = line;
+            row.querySelector('span').textContent = t('reuse');
             row.addEventListener('click', () => reuse(i));
             els.recentsList.appendChild(row);
         });
@@ -161,8 +280,33 @@
         if (document.activeElement !== els.ovenCustomInput) els.ovenCustomInput.value = state.oven;
     }
 
+    function renderLangChips() {
+        const labels = { 'default': 'langDefault', 'en': 'langEn', 'zh-Hant': 'langZhHant' };
+        els.langChips.innerHTML = '';
+        LANG_OPTIONS.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = t(labels[opt]);
+            btn.className = 'rounded-[20px] px-[15px] py-[9px] font-extrabold text-[12.5px] border-[1.5px] ' + (
+                state.lang === opt
+                    ? 'text-white bg-[#d97a2b] border-[#d97a2b]'
+                    : 'text-[#c25a1e] bg-[#fbe9d3] border-[#fbe9d3]'
+            );
+            btn.addEventListener('click', () => {
+                state.lang = opt;
+                saveState();
+                applyStaticI18n();
+                render();
+                renderOvenSheet();
+                renderLangChips();
+            });
+            els.langChips.appendChild(btn);
+        });
+    }
+
     function openOvenSheet() {
         renderOvenSheet();
+        renderLangChips();
         els.ovenScrim.classList.remove('hidden');
         els.ovenSheet.classList.remove('hidden');
     }
@@ -251,7 +395,7 @@
         els.scanningOverlay.classList.toggle('hidden', !active);
         els.scanBtn.disabled = active;
         els.pickBtn.disabled = active;
-        if (active) els.scanningSubtitle.textContent = 'Recognising text — right here on your phone';
+        if (active) els.scanningSubtitle.textContent = t('recognising');
     }
 
     function handleScan(file) {
@@ -288,5 +432,6 @@
         if (!state.isEstimate) addRecent();
     }
 
+    applyStaticI18n();
     render();
 })();
