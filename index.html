@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Heat it right — Microwave Time Converter</title>
+<title data-i18n="title">Heat it right — Microwave Time Converter</title>
 <meta name="theme-color" content="#f7efe1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,10 +28,10 @@
 
     <!-- Header -->
     <div class="flex items-center justify-between flex-none px-6 pb-1" style="padding-top: calc(1rem + env(safe-area-inset-top))">
-      <div class="font-black text-xl text-[#2e2620]">Heat it right</div>
+      <div class="font-black text-xl text-[#2e2620]" data-i18n="appTitle">Heat it right</div>
       <button id="oven-chip" type="button" class="flex items-center gap-[7px] bg-[#efe7d4] border-[1.5px] border-[#e0d4bb] rounded-[20px] px-3 py-[7px]">
         <svg viewBox="0 0 24 24" width="18" height="15" fill="none" stroke="#8a7256" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2"></rect><rect x="5" y="8" width="9.5" height="8" rx="1"></rect><line x1="18" y1="8.5" x2="18" y2="9.7"></line><line x1="18" y1="12" x2="18" y2="13.2"></line></svg>
-        <span class="font-semibold text-[10.5px] text-[#8a7256]">your oven</span>
+        <span class="font-semibold text-[10.5px] text-[#8a7256]" data-i18n="yourOven">your oven</span>
         <span id="oven-chip-value" class="font-extrabold text-[13px] text-[#2e2620]">700 W</span>
         <span class="font-bold text-[13px] text-[#c25a1e]">&rsaquo;</span>
       </button>
@@ -46,18 +46,18 @@
       </div>
 
       <button id="empty-state" type="button" class="w-full border-2 border-dashed border-[#e0cfae] rounded-[24px] px-[26px] py-[30px] text-center flex flex-col items-center gap-3">
-        <img src="empty-state-illustration.png" alt="Scan a package with your camera" class="w-full max-w-[240px] h-auto">
-        <div class="font-black text-[21px] leading-tight text-[#8a7d6c]">Cook it for the right time</div>
-        <div class="font-bold text-[13px] text-[#b3a180]">Scan the package or enter it below</div>
+        <img src="empty-state-illustration.png" alt="Scan a package with your camera" data-i18n-alt="scanAlt" class="w-full max-w-[240px] h-auto">
+        <div class="font-black text-[21px] leading-tight text-[#8a7d6c]" data-i18n="emptyTitle">Cook it for the right time</div>
+        <div class="font-bold text-[13px] text-[#b3a180]" data-i18n="emptySubtitle">Scan the package or enter it below</div>
       </button>
 
       <div id="estimate-warning" class="hidden flex bg-[#fbe9d3] border-[1.5px] border-[#f0cfa0] rounded-2xl px-[15px] py-[13px] gap-[11px] items-start mt-3.5">
         <div class="w-5 h-5 rounded-full bg-[#d97a2b] text-white font-extrabold text-[13px] flex items-center justify-center flex-none mt-px">!</div>
-        <div class="font-semibold text-[12.5px] leading-[1.45] text-[#8a5a26]">Couldn't read the package power, so I assumed 700 W — typical for a home meal. Change it below if yours is different.</div>
+        <div class="font-semibold text-[12.5px] leading-[1.45] text-[#8a5a26]" data-i18n="estimateWarning">Couldn't read the package power, so I assumed 700 W — typical for a home meal. Change it below if yours is different.</div>
       </div>
 
       <div id="recents-section" class="hidden">
-        <div class="font-extrabold text-[11px] uppercase tracking-[.08em] text-[#a89a86] mt-[22px] mb-2.5">Last 2 cooks</div>
+        <div class="font-extrabold text-[11px] uppercase tracking-[.08em] text-[#a89a86] mt-[22px] mb-2.5" data-i18n="lastCooks">Last 2 cooks</div>
         <div id="recents-list"></div>
       </div>
     </div>
@@ -65,8 +65,8 @@
     <!-- Bottom band (thumb zone) -->
     <div class="flex-none border-t-[1.5px] border-[#ece1cd] bg-[#f7efe1] px-6 pt-3.5" style="padding-bottom: calc(22px + env(safe-area-inset-bottom))">
       <div class="flex items-baseline justify-between mb-2">
-        <span class="font-extrabold text-[11px] uppercase tracking-[.08em] text-[#c25a1e]">From the package</span>
-        <span class="font-semibold text-[11px] text-[#a89a86]">type or scan</span>
+        <span class="font-extrabold text-[11px] uppercase tracking-[.08em] text-[#c25a1e]" data-i18n="fromPackage">From the package</span>
+        <span class="font-semibold text-[11px] text-[#a89a86]" data-i18n="typeOrScan">type or scan</span>
       </div>
       <div class="bg-white border-[1.5px] border-[#e6dac6] rounded-2xl px-4 mb-3">
         <div class="flex justify-between items-center py-3 border-b-[1.5px] border-[#f0e8d8]">
@@ -77,20 +77,20 @@
           </div>
         </div>
         <div class="flex justify-between items-center py-3">
-          <span class="font-bold text-[12.5px] text-[#6b5f50]">Cook time</span>
+          <span class="font-bold text-[12.5px] text-[#6b5f50]" data-i18n="cookTime">Cook time</span>
           <div class="flex items-baseline gap-0.5">
             <input id="pkg-min" type="number" inputmode="numeric" placeholder="–" class="w-[34px] border-none bg-transparent font-extrabold text-lg text-[#2e2620] text-right outline-none">
             <span class="font-extrabold text-lg text-[#e0cfae]">:</span>
             <input id="pkg-sec" type="number" inputmode="numeric" placeholder="––" class="w-11 border-none bg-transparent font-extrabold text-lg text-[#2e2620] pl-1 outline-none">
-            <span class="font-semibold text-[11px] uppercase tracking-[.06em] text-[#c9b9a2]">sec</span>
+            <span class="font-semibold text-[11px] uppercase tracking-[.06em] text-[#c9b9a2]" data-i18n="sec">sec</span>
           </div>
         </div>
       </div>
       <button id="scan-btn" type="button" class="w-full bg-[#d97a2b] rounded-2xl py-4 flex items-center justify-center gap-2.5 shadow-[0_12px_24px_-14px_rgba(217,122,43,.75)] disabled:opacity-60">
         <svg viewBox="0 0 24 24" width="24" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5a2 2 0 0 1 2-2h1.7l.9-1.6a1 1 0 0 1 .87-.5h5.06a1 1 0 0 1 .87.5l.9 1.6H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><circle cx="12" cy="12.6" r="3.4"></circle></svg>
-        <span class="font-black text-[17px] text-white">Scan the package</span>
+        <span class="font-black text-[17px] text-white" data-i18n="scanPackage">Scan the package</span>
       </button>
-      <button id="pick-btn" type="button" class="w-full mt-2 text-center font-semibold text-[11.5px] text-[#a89a86] disabled:opacity-60">
+      <button id="pick-btn" type="button" class="w-full mt-2 text-center font-semibold text-[11.5px] text-[#a89a86] disabled:opacity-60" data-i18n="chooseFromLibrary">
         or choose a photo from your library
       </button>
       <!-- Two inputs because no single one reliably covers both sources on
@@ -109,23 +109,32 @@
     <!-- Scanning overlay -->
     <div id="scanning-overlay" class="hidden flex flex-col items-center justify-center gap-[18px] absolute inset-0 bg-[#1c1712] z-20">
       <div class="w-[54px] h-[54px] border-[5px] border-white/[.14] border-t-[#ffab3d] rounded-full mw-spin"></div>
-      <div class="font-extrabold text-[15px] text-[#f7efe1]">Reading the label…</div>
-      <div id="scanning-subtitle" class="font-semibold text-xs text-[#c9b596] text-center px-10">Recognising text — right here on your phone</div>
+      <div class="font-extrabold text-[15px] text-[#f7efe1]" data-i18n="readingLabel">Reading the label…</div>
+      <div id="scanning-subtitle" class="font-semibold text-xs text-[#c9b596] text-center px-10" data-i18n="recognising">Recognising text — right here on your phone</div>
     </div>
 
     <!-- Oven sheet -->
     <div id="oven-scrim" class="hidden absolute inset-0 bg-[rgba(28,23,18,.45)] z-30"></div>
-    <div id="oven-sheet" class="hidden absolute left-0 right-0 bottom-0 bg-[#f7efe1] rounded-t-[26px] px-6 pt-5 shadow-[0_-10px_30px_rgba(0,0,0,.25)] mw-rise z-40" style="padding-bottom: calc(28px + env(safe-area-inset-bottom))">
+    <div id="oven-sheet" class="hidden absolute left-0 right-0 bottom-0 max-h-[90%] overflow-y-auto bg-[#f7efe1] rounded-t-[26px] px-6 pt-5 shadow-[0_-10px_30px_rgba(0,0,0,.25)] mw-rise z-40" style="padding-bottom: calc(28px + env(safe-area-inset-bottom))">
       <div class="w-10 h-1 rounded-full bg-[#e0cfae] mx-auto mb-[18px]"></div>
-      <div class="font-black text-[19px] text-[#2e2620] mb-1">Your microwave's power</div>
-      <div class="font-semibold text-[12.5px] leading-[1.45] text-[#8a7d6c] mb-4">Most home microwaves are 600–800 W — it's printed inside the door or on the back.</div>
+      <div class="font-black text-[22px] text-[#2e2620] mb-5" data-i18n="settings">Settings</div>
+
+      <!-- Microwave power -->
+      <div class="font-extrabold text-[15px] text-[#2e2620] mb-1" data-i18n="ovenPower">Your microwave's power</div>
+      <div class="font-semibold text-[12.5px] leading-[1.45] text-[#8a7d6c] mb-4" data-i18n="ovenPowerDesc">Most home microwaves are 600–800 W — it's printed inside the door or on the back.</div>
       <div id="oven-chips" class="flex gap-2 flex-wrap mb-3.5"></div>
-      <div class="flex items-center gap-2 bg-white border-[1.5px] border-[#e6dac6] rounded-[14px] px-4 py-3 mb-4">
-        <span class="font-semibold text-xs text-[#8a7d6c]">Custom</span>
+      <div class="flex items-center gap-2 bg-white border-[1.5px] border-[#e6dac6] rounded-[14px] px-4 py-3 mb-6">
+        <span class="font-semibold text-xs text-[#8a7d6c]" data-i18n="custom">Custom</span>
         <input id="oven-custom-input" type="number" inputmode="numeric" class="flex-1 border-none bg-transparent font-extrabold text-lg text-[#2e2620] text-right outline-none">
         <span class="font-bold text-[12.5px] text-[#a89a86]">W</span>
       </div>
-      <button id="oven-save-btn" type="button" class="w-full bg-[#d97a2b] rounded-2xl py-[15px] font-extrabold text-[15px] text-white">Save</button>
+
+      <!-- Interface language -->
+      <div class="font-extrabold text-[15px] text-[#2e2620] mb-1" data-i18n="language">Interface language</div>
+      <div class="font-semibold text-[12.5px] leading-[1.45] text-[#8a7d6c] mb-4" data-i18n="languageDesc">“Default” follows your browser; if it isn't supported, English is used.</div>
+      <div id="lang-chips" class="flex gap-2 flex-wrap mb-6"></div>
+
+      <button id="oven-save-btn" type="button" class="w-full bg-[#d97a2b] rounded-2xl py-[15px] font-extrabold text-[15px] text-white" data-i18n="save">Save</button>
     </div>
 
   </div>
