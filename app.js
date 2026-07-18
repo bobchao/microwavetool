@@ -25,7 +25,7 @@
             scanAlt: 'Scan a package with your camera',
             cookFor: 'Cook for',
             cookForEstimate: 'Cook for · estimate',
-            emptyTitle: 'Cook it for the right time',
+            emptyTitle: 'How long in your microwave?',
             emptySubtitle: 'Scan the package or enter it below',
             estimateWarning: "Couldn't read the package power, so I assumed 700 W — typical for a home meal. Change it below if yours is different.",
             lastCooks: 'Last 2 cooks',
