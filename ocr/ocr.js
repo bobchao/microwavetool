@@ -51,9 +51,10 @@
                 if (!window.Tesseract) {
                     await loadScript(VENDOR + 'tesseract.min.js');
                 }
-                // eng covers Latin labels; chi_tra also covers the 分/秒/瓦
-                // glyphs used on Chinese and Japanese packaging.
-                return Tesseract.createWorker(['eng', 'chi_tra'], 1, {
+                // eng covers Latin labels; chi_tra covers the 分/秒/瓦 kanji
+                // shared with Japanese; jpn adds kana (e.g. the ワット reading
+                // of watts) and Japanese-specific type styling.
+                return Tesseract.createWorker(['eng', 'chi_tra', 'jpn'], 1, {
                     workerPath: VENDOR + 'worker.min.js',
                     corePath: VENDOR,
                     langPath: VENDOR + 'lang',

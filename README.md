@@ -7,7 +7,7 @@ This app originated from [Make Real](https://makereal.tldraw.com/), was then ite
 
 ## Features
 - **Time Conversion**: Enter the package's power + cook time and your own microwave's wattage to get the adjusted cooking time, rounded to a friendly value (nearest 10s) with the exact value shown alongside.
-- **Scan Package Photo (OCR)**: Tap "Scan the package" to shoot the package's microwave instructions (on devices without a camera it falls back to a file picker) and have the power and time filled in automatically. When the photo doesn't clearly show a wattage, a typical 700 W is assumed and flagged as an estimate until you correct it. Recognition runs entirely in your browser with [Tesseract.js](https://github.com/naptha/tesseract.js) — the photo is never uploaded anywhere. The OCR engine and language data (English + Traditional Chinese, which also covers the 分/秒 glyphs on Japanese packaging, ~8 MB) are served with the app and downloaded only on first use, then cached for offline use.
+- **Scan Package Photo (OCR)**: Tap "Scan the package" to shoot the package's microwave instructions (on devices without a camera it falls back to a file picker) and have the power and time filled in automatically. When the photo doesn't clearly show a wattage, a typical 700 W is assumed and flagged as an estimate until you correct it. Recognition runs entirely in your browser with [Tesseract.js](https://github.com/naptha/tesseract.js) — the photo is never uploaded anywhere. The OCR engine and language data (English, Traditional Chinese, and Japanese, ~10 MB) are served with the app and downloaded only on first use, then cached for offline use.
 - **Your Oven's Wattage**: A remembered default (700 W out of the box) shown as a chip in the header — tap it to change via presets or a custom value.
 - **Last 2 Cooks**: Recent scans are kept for one-tap reuse.
 - **Save Preferences**: Your oven wattage, last package fields, and recent cooks are saved for quick reference on your next visit.
@@ -30,7 +30,7 @@ This web application can be used directly from a web browser without any install
 - `app.js` holds the main-screen state (oven wattage, package fields, recents) and rendering; no framework/build step — plain DOM.
 - `ocr/mw-parse.js` extracts wattage/time pairs from OCR text and is unit-tested: run `node test/mw-parse.test.js`.
 - `ocr/ocr.js` exposes `window.mwOcr.scan(file, { onProgress })`, a UI-agnostic wrapper around Tesseract.js (lazy-loaded on first use). Raw OCR text and every extracted value are written to the browser console for debugging.
-- `ocr/vendor/` contains the self-hosted Tesseract.js v5.1.1 assets (`tesseract.min.js`, `worker.min.js`, LSTM wasm cores, and `4.0.0_best_int` traineddata for `eng` + `chi_tra`).
+- `ocr/vendor/` contains the self-hosted Tesseract.js v5.1.1 assets (`tesseract.min.js`, `worker.min.js`, LSTM wasm cores, and `4.0.0_best_int` traineddata for `eng` + `chi_tra` + `jpn`).
 
 ## Contributing
 Feel free to fork this repository and submit pull requests to contribute to this project. For major changes, please open an issue first to discuss what you would like to change.
