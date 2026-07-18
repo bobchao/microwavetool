@@ -1,9 +1,11 @@
-const CACHE_NAME = 'microwave-time-converter-v7';
+const CACHE_NAME = 'microwave-time-converter-v8';
 
 // The app shell — everything needed to boot and run offline. Cached atomically
 // (addAll) so the app is either fully bootable or the install fails and retries;
 // it's small and quick, which keeps the "installed, then went offline a second
-// later" window tiny.
+// later" window tiny. Includes the lazily-injected non-English locale files
+// (i18n/*.js, see app.js's loadLang) — they're tiny, and without them a
+// zh-Hant/ja user offline on first load would be stuck with English.
 const shellAssets = [
     './',
     './index.html',
@@ -11,6 +13,8 @@ const shellAssets = [
     './vendor/tailwind.js',
     './fonts/nunito-latin.woff2',
     './fonts/nunito-latin-ext.woff2',
+    './i18n/zh-Hant.js',
+    './i18n/ja.js',
     './manifest.json',
     './ocr/mw-parse.js',
     './ocr/ocr.js'
@@ -33,18 +37,21 @@ const extraAssets = [
 // makes a cold offline launch actually open instead of the browser's dino page.
 const APP_SHELL = './index.html';
 
-// The OCR engine (~13 MB). Deliberately kept out of the install precache so
+// The OCR engine (~14 MB). Deliberately kept out of the install precache so
 // plain web visitors don't pay for it up front. Warmed on demand only when the
 // app runs as an installed PWA (page posts { type: 'WARM_OCR' }), so installed
 // users — who expect offline to just work — have it ready. Both wasm cores are
 // listed because which one Tesseract picks (SIMD vs not) is decided at runtime.
+// All three languages are listed because ocr.js's createWorker call loads
+// them together on first scan — offline with any one missing fails the scan.
 const ocrAssets = [
     './ocr/vendor/tesseract.min.js',
     './ocr/vendor/worker.min.js',
     './ocr/vendor/tesseract-core-simd-lstm.wasm.js',
     './ocr/vendor/tesseract-core-lstm.wasm.js',
     './ocr/vendor/lang/eng.traineddata.gz',
-    './ocr/vendor/lang/chi_tra.traineddata.gz'
+    './ocr/vendor/lang/chi_tra.traineddata.gz',
+    './ocr/vendor/lang/jpn.traineddata.gz'
 ];
 
 // 安裝 Service Worker:先原子性快取 app shell(缺一不可),再盡力補快取次要資源
@@ -84,7 +91,7 @@ self.addEventListener('message', event => {
 });
 
 // 快取策略:
-// - ocr/vendor/ 底下的大檔(~13MB)採快取優先。網頁訪客第一次啟用拍照辨識、實際
+// - ocr/vendor/ 底下的大檔(~14MB)採快取優先。網頁訪客第一次啟用拍照辨識、實際
 //   下載時才寫入;安裝成 PWA 者則由上面的 WARM_OCR 預先備妥。兩種情況之後都離線可用。
 // - 其他資源(HTML、JS 等)採網路優先、失敗才回快取。若採快取優先,部署新版後
 //   舊訪客會永遠拿到快取裡的舊頁面。
