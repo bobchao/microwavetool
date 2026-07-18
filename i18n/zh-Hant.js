@@ -31,6 +31,7 @@ window.MW_I18N['zh-Hant'] = {
     langZhHant: '繁體中文',
     langJa: '日本語',
     save: '儲存',
+    about: '<a href="https://github.com/bobchao/microwavetool" target="_blank" rel="noopener">GitHub 專案頁面</a>',
     reuse: '再用一次',
     doubleCheck: '請再確認下方的包裝瓦數',
     exactly: t => `精確時間為 ${t} · 已四捨五入至最接近的 10 秒`,

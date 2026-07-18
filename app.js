@@ -50,6 +50,7 @@
             langZhHant: '繁體中文',
             langJa: '日本語',
             save: 'Save',
+            about: '<a href="https://github.com/bobchao/microwavetool" target="_blank" rel="noopener">GitHub project page</a>',
             reuse: 'Reuse',
             doubleCheck: 'double-check the package power below',
             exactly: t => `exactly ${t} · rounded to the nearest 10s`,
@@ -120,6 +121,13 @@
         document.querySelectorAll('[data-i18n-alt]').forEach(el => {
             const val = dict[el.getAttribute('data-i18n-alt')];
             if (typeof val === 'string') el.setAttribute('alt', val);
+        });
+        // Strings that carry markup (e.g. the About line's link) are set as
+        // HTML rather than text. The source is our own I18N table, not user
+        // input, so this is safe.
+        document.querySelectorAll('[data-i18n-html]').forEach(el => {
+            const val = dict[el.getAttribute('data-i18n-html')];
+            if (typeof val === 'string') el.innerHTML = val;
         });
     }
 
