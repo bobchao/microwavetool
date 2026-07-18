@@ -31,6 +31,7 @@ window.MW_I18N['ja'] = {
     langZhHant: '繁體中文',
     langJa: '日本語',
     save: '保存',
+    about: '<a href="https://github.com/bobchao/microwavetool" target="_blank" rel="noopener">GitHub プロジェクトページ</a>',
     reuse: 'もう一度使う',
     doubleCheck: '下のパッケージ出力をご確認ください',
     exactly: t => `正確には ${t} · 10秒単位に丸めています`,

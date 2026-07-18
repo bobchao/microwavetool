@@ -20,6 +20,8 @@
   @keyframes mwrise { from { transform: translateY(24px); opacity: .4; } to { transform: translateY(0); opacity: 1; } }
   .mw-spin { animation: mwspin .8s linear infinite; }
   .mw-rise { animation: mwrise .28s ease; }
+  #about-line a { color: #c25a1e; font-weight: 700; text-decoration: none; }
+  #about-line a:hover { text-decoration: underline; }
 </style>
 </head>
 <body class="bg-[#efe6d6]">
@@ -138,6 +140,9 @@
       </div>
 
       <button id="oven-save-btn" type="button" class="w-full bg-[#d97a2b] rounded-2xl py-[15px] font-extrabold text-[15px] text-white" data-i18n="save">Save</button>
+
+      <!-- About -->
+      <p id="about-line" class="text-center font-semibold text-[11.5px] leading-[1.6] text-[#a89a86] mt-5" data-i18n-html="about"><a href="https://github.com/bobchao/microwavetool" target="_blank" rel="noopener">GitHub project page</a></p>
     </div>
 
   </div>
