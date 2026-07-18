@@ -132,7 +132,10 @@
       <!-- Interface language -->
       <div class="font-extrabold text-[15px] text-[#2e2620] mb-1" data-i18n="language">Interface language</div>
       <div class="font-semibold text-[12.5px] leading-[1.45] text-[#8a7d6c] mb-4" data-i18n="languageDesc">“Default” follows your browser; if it isn't supported, English is used.</div>
-      <div id="lang-chips" class="flex gap-2 flex-wrap mb-6"></div>
+      <div class="relative mb-6">
+        <select id="lang-select" class="w-full appearance-none bg-white border-[1.5px] border-[#e6dac6] rounded-[14px] pl-4 pr-10 py-3 font-extrabold text-[13px] text-[#2e2620] outline-none"></select>
+        <svg class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#c25a1e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
 
       <button id="oven-save-btn" type="button" class="w-full bg-[#d97a2b] rounded-2xl py-[15px] font-extrabold text-[15px] text-white" data-i18n="save">Save</button>
     </div>

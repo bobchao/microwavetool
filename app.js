@@ -149,7 +149,7 @@
         ovenChips: document.getElementById('oven-chips'),
         ovenCustomInput: document.getElementById('oven-custom-input'),
         ovenSaveBtn: document.getElementById('oven-save-btn'),
-        langChips: document.getElementById('lang-chips')
+        langSelect: document.getElementById('lang-select')
     };
 
     function loadState() {
@@ -285,39 +285,24 @@
         if (document.activeElement !== els.ovenCustomInput) els.ovenCustomInput.value = state.oven;
     }
 
-    function renderLangChips() {
+    // A <select> rather than chips so the row stays one line however many
+    // languages exist. Options are rebuilt each call so their labels re-render
+    // in the newly chosen language; the change handler is bound once elsewhere.
+    function renderLangSelect() {
         const labels = { 'default': 'langDefault', 'en': 'langEn', 'zh-Hant': 'langZhHant', 'ja': 'langJa' };
-        els.langChips.innerHTML = '';
+        els.langSelect.innerHTML = '';
         LANG_OPTIONS.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.textContent = t(labels[opt]);
-            btn.className = 'rounded-[20px] px-[15px] py-[9px] font-extrabold text-[12.5px] border-[1.5px] ' + (
-                state.lang === opt
-                    ? 'text-white bg-[#d97a2b] border-[#d97a2b]'
-                    : 'text-[#c25a1e] bg-[#fbe9d3] border-[#fbe9d3]'
-            );
-            btn.addEventListener('click', () => {
-                state.lang = opt;
-                saveState();
-                renderLangChips(); // reflect the selection immediately
-                // Ensure the locale table is loaded before re-rendering; the
-                // chip labels stay readable meanwhile because English (loaded)
-                // carries every langXx key as the fallback.
-                loadLang(resolveLang(opt)).catch(() => {}).finally(() => {
-                    applyStaticI18n();
-                    render();
-                    renderOvenSheet();
-                    renderLangChips();
-                });
-            });
-            els.langChips.appendChild(btn);
+            const o = document.createElement('option');
+            o.value = opt;
+            o.textContent = t(labels[opt]);
+            els.langSelect.appendChild(o);
         });
+        els.langSelect.value = state.lang;
     }
 
     function openOvenSheet() {
         renderOvenSheet();
-        renderLangChips();
+        renderLangSelect();
         els.ovenScrim.classList.remove('hidden');
         els.ovenSheet.classList.remove('hidden');
     }
@@ -355,6 +340,18 @@
     els.ovenChip.addEventListener('click', openOvenSheet);
     els.ovenScrim.addEventListener('click', closeOvenSheet);
     els.ovenSaveBtn.addEventListener('click', () => { saveState(); closeOvenSheet(); });
+    els.langSelect.addEventListener('change', e => {
+        state.lang = e.target.value;
+        saveState();
+        // Load the chosen locale before re-rendering; English (always loaded)
+        // covers the labels meanwhile so nothing shows as undefined.
+        loadLang(resolveLang(state.lang)).catch(() => {}).finally(() => {
+            applyStaticI18n();
+            render();
+            renderOvenSheet();
+            renderLangSelect();
+        });
+    });
     els.ovenCustomInput.addEventListener('input', e => {
         state.oven = e.target.value;
         saveState();
