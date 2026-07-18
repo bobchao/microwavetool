@@ -7,10 +7,15 @@
 
     // --- Internationalisation -------------------------------------------------
     // Language options: 'default' (follow the browser, falling back to English
-    // when no supported language matches), 'en', and 'zh-Hant'. The choice is
-    // persisted alongside the rest of the state so it survives reloads.
-    const SUPPORTED_LANGS = ['en', 'zh-Hant'];
-    const LANG_OPTIONS = ['default', 'en', 'zh-Hant'];
+    // when no supported language matches), 'en', 'zh-Hant', and 'ja'. The choice
+    // is persisted alongside the rest of the state so it survives reloads.
+    //
+    // English is bundled inline below as the always-available fallback; the
+    // other locales live in i18n/<code>.js and are injected on demand the first
+    // time they're needed (see loadLang). Locale files register themselves onto
+    // the shared MW_I18N table, which is just this I18N object.
+    const SUPPORTED_LANGS = ['en', 'zh-Hant', 'ja'];
+    const LANG_OPTIONS = ['default', 'en', 'zh-Hant', 'ja'];
 
     const I18N = {
         en: {
@@ -43,71 +48,71 @@
             langDefault: 'Default',
             langEn: 'English',
             langZhHant: '繁體中文',
+            langJa: '日本語',
             save: 'Save',
             reuse: 'Reuse',
             doubleCheck: 'double-check the package power below',
             exactly: t => `exactly ${t} · rounded to the nearest 10s`,
             recentLine: (pw, time, oven) => `${pw} W · ${time} → your ${oven} W`
-        },
-        'zh-Hant': {
-            title: '加熱剛剛好 — 微波時間換算',
-            appTitle: '加熱剛剛好',
-            yourOven: '你的微波爐',
-            scanAlt: '用相機掃描包裝',
-            cookFor: '加熱時間',
-            cookForEstimate: '加熱時間 · 估算',
-            emptyTitle: '用剛剛好的時間加熱',
-            emptySubtitle: '掃描包裝，或在下方輸入',
-            estimateWarning: '讀不到包裝上的瓦數，所以先以 700 W 估算——這是家庭餐點常見的功率。如果你的不同，請在下方修改。',
-            lastCooks: '最近 2 次加熱',
-            fromPackage: '包裝上的資訊',
-            typeOrScan: '輸入或掃描',
-            power: '功率',
-            powerAssumed: '功率 · 估算',
-            cookTime: '加熱時間',
-            sec: '秒',
-            scanPackage: '掃描包裝',
-            chooseFromLibrary: '或從相簿選一張照片',
-            readingLabel: '正在讀取標籤…',
-            recognising: '正在辨識文字——就在你的手機上',
-            settings: '設定',
-            ovenPower: '你的微波爐功率',
-            ovenPowerDesc: '大多數家用微波爐為 600–800 W——通常印在門內側或機身背面。',
-            custom: '自訂',
-            language: '介面語言',
-            languageDesc: '「預設」會依照瀏覽器語言；若不支援，則使用英文。',
-            langDefault: '預設',
-            langEn: 'English',
-            langZhHant: '繁體中文',
-            save: '儲存',
-            reuse: '再用一次',
-            doubleCheck: '請再確認下方的包裝瓦數',
-            exactly: t => `精確為 ${t} · 已四捨五入至最接近的 10 秒`,
-            recentLine: (pw, time, oven) => `${pw} W · ${time} → 你的 ${oven} W`
         }
     };
 
+    // The shared registry that on-demand locale files (i18n/*.js) attach to.
+    window.MW_I18N = I18N;
+    const LANG_SRC = { 'zh-Hant': 'i18n/zh-Hant.js', 'ja': 'i18n/ja.js' };
+    const langLoads = {}; // code -> Promise, so each locale is fetched at most once
+
+    // Inject a locale's <script> the first time it's needed. Resolves once the
+    // table is registered on I18N; 'en' and already-loaded locales resolve
+    // immediately. An unknown code resolves too — activeLang() then falls back
+    // to English rather than reading an undefined table.
+    function loadLang(code) {
+        if (I18N[code]) return Promise.resolve();
+        const src = LANG_SRC[code];
+        if (!src) return Promise.resolve();
+        if (!langLoads[code]) {
+            langLoads[code] = new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = src;
+                s.onload = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        }
+        return langLoads[code];
+    }
+
+    // The resolved language if its table is loaded, otherwise English. Guards
+    // every synchronous I18N read against a locale that hasn't arrived yet.
+    function activeLang() {
+        const r = resolveLang(state.lang);
+        return I18N[r] ? r : 'en';
+    }
+
     // Map a stored language preference to an actual translation table key.
     // 'default' inspects the browser's preferred languages and picks Traditional
-    // Chinese for any zh preference, otherwise English.
+    // Chinese for any zh preference, Japanese for any ja preference, otherwise
+    // English.
     function resolveLang(pref) {
         if (SUPPORTED_LANGS.indexOf(pref) !== -1) return pref;
         const prefs = navigator.languages && navigator.languages.length
             ? navigator.languages
             : [navigator.language || 'en'];
         for (const l of prefs) {
-            if (l && l.toLowerCase().indexOf('zh') === 0) return 'zh-Hant';
+            const lc = l && l.toLowerCase();
+            if (lc && lc.indexOf('zh') === 0) return 'zh-Hant';
+            if (lc && lc.indexOf('ja') === 0) return 'ja';
         }
         return 'en';
     }
 
     function t(key) {
-        return I18N[resolveLang(state.lang)][key];
+        return I18N[activeLang()][key];
     }
 
     function applyStaticI18n() {
-        const dict = I18N[resolveLang(state.lang)];
-        document.documentElement.lang = resolveLang(state.lang) === 'zh-Hant' ? 'zh-Hant' : 'en';
+        const dict = I18N[activeLang()];
+        document.documentElement.lang = activeLang();
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const val = dict[el.getAttribute('data-i18n')];
             if (typeof val === 'string') el.textContent = val;
@@ -281,7 +286,7 @@
     }
 
     function renderLangChips() {
-        const labels = { 'default': 'langDefault', 'en': 'langEn', 'zh-Hant': 'langZhHant' };
+        const labels = { 'default': 'langDefault', 'en': 'langEn', 'zh-Hant': 'langZhHant', 'ja': 'langJa' };
         els.langChips.innerHTML = '';
         LANG_OPTIONS.forEach(opt => {
             const btn = document.createElement('button');
@@ -295,10 +300,16 @@
             btn.addEventListener('click', () => {
                 state.lang = opt;
                 saveState();
-                applyStaticI18n();
-                render();
-                renderOvenSheet();
-                renderLangChips();
+                renderLangChips(); // reflect the selection immediately
+                // Ensure the locale table is loaded before re-rendering; the
+                // chip labels stay readable meanwhile because English (loaded)
+                // carries every langXx key as the fallback.
+                loadLang(resolveLang(opt)).catch(() => {}).finally(() => {
+                    applyStaticI18n();
+                    render();
+                    renderOvenSheet();
+                    renderLangChips();
+                });
             });
             els.langChips.appendChild(btn);
         });
@@ -432,6 +443,11 @@
         if (!state.isEstimate) addRecent();
     }
 
-    applyStaticI18n();
-    render();
+    // Load the resolved locale (if any) before the first paint. English is
+    // inline, so the page shows its hardcoded English markup until a non-English
+    // preference's table arrives (usually cached, near-instant), then swaps.
+    loadLang(resolveLang(state.lang)).catch(() => {}).finally(() => {
+        applyStaticI18n();
+        render();
+    });
 })();
