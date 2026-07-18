@@ -10,6 +10,7 @@ const cases = [
     ['en: minutes only, no watt', '2 minutes', { watts: null, seconds: 120 }],
     ['jp-style: watt + 分秒', '500W 2分30秒', { watts: 500, seconds: 150 }],
     ['jp-style: watt + 分秒 (b)', '600W 1分40秒', { watts: 600, seconds: 100 }],
+    ['jp: ワット reading + 分秒', '500ワットで2分30秒', { watts: 500, seconds: 150 }],
     ['colon notation', '2:30', { watts: null, seconds: 150 }],
     ['zh: minutes only', '600瓦 加熱3分鐘', { watts: 600, seconds: 180 }],
     ['full-width digits and colon', '７００Ｗ ２：３０', { watts: 700, seconds: 150 }],
