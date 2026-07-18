@@ -5,13 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title data-i18n="title">Heat it right — Microwave Time Converter</title>
 <meta name="theme-color" content="#f7efe1">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/x-icon" href="fav64.png">
-<script src="https://cdn.tailwindcss.com"></script>
+<!-- Self-hosted for offline use — see vendor/tailwind.js and fonts/ (Tailwind: MIT; Nunito: SIL OFL 1.1, fonts/OFL.txt). -->
+<script src="vendor/tailwind.js"></script>
 <style>
+  /* Nunito is a variable font: one woff2 per subset covers weights 400–900. */
+  @font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 400 900;
+    font-display: swap;
+    src: url(fonts/nunito-latin.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  @font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 400 900;
+    font-display: swap;
+    src: url(fonts/nunito-latin-ext.woff2) format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
   body { font-family: 'Nunito', system-ui, sans-serif; }
   input[type=number]::-webkit-outer-spin-button,
   input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -152,16 +167,39 @@
 <script src="ocr/ocr.js"></script>
 <script src="app.js"></script>
 <script>
+    // Running as an installed PWA (Android/desktop standalone, or iOS
+    // add-to-home) rather than a browser tab. Installed users expect the app
+    // to work offline, so we proactively warm the ~14 MB OCR engine; plain web
+    // visitors keep the lazy-on-first-scan behaviour and pay no upfront cost.
+    function mwIsStandalone() {
+        return window.matchMedia('(display-mode: standalone)').matches
+            || window.navigator.standalone === true;
+    }
+
+    // Ask the active service worker to cache the OCR assets (idempotent —
+    // it only fetches what's missing). No-op when offline; retried on the
+    // next standalone launch.
+    function mwWarmOcr() {
+        if (!navigator.onLine) return;
+        navigator.serviceWorker.ready.then(function(reg) {
+            if (reg.active) reg.active.postMessage({ type: 'WARM_OCR' });
+        });
+    }
+
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('./service-worker.js')
             .then(function(registration) {
                 console.log('Service Worker Registered!', registration);
+                if (mwIsStandalone()) mwWarmOcr();
             })
             .catch(function(error) {
                 console.log('Service Worker Registration Failed!', error);
             });
         });
+        // Fires the moment the user installs the PWA, covering the
+        // "install then immediately go offline" case.
+        window.addEventListener('appinstalled', mwWarmOcr);
     }
 </script>
 </body>
