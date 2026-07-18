@@ -1,19 +1,37 @@
-const CACHE_NAME = 'microwave-time-converter-v6';
-const urlsToCache = [
+const CACHE_NAME = 'microwave-time-converter-v7';
+
+// The app shell — everything needed to boot and run offline. Cached atomically
+// (addAll) so the app is either fully bootable or the install fails and retries;
+// it's small and quick, which keeps the "installed, then went offline a second
+// later" window tiny.
+const shellAssets = [
     './',
     './index.html',
     './app.js',
     './vendor/tailwind.js',
     './fonts/nunito-latin.woff2',
     './fonts/nunito-latin-ext.woff2',
-    './empty-state-illustration.png',
-    './fav64.png',
-    './mw512.png',
-    './mw192.png',
     './manifest.json',
     './ocr/mw-parse.js',
     './ocr/ocr.js'
 ];
+
+// Nice-to-have assets (2.3 MB illustration + icons). Cached best-effort and
+// non-blocking: a slow illustration must NOT abort the shell precache (addAll
+// is atomic — one laggard would drop everything, so an install-then-offline
+// user could end up with nothing cached and a blank app). The network-first
+// runtime handler picks these up on the first online view regardless.
+const extraAssets = [
+    './empty-state-illustration.png',
+    './fav64.png',
+    './mw512.png',
+    './mw192.png'
+];
+
+// Served for any navigation that can't be fetched or matched exactly (e.g. the
+// PWA launching start_url './' before that precise URL is cached). This is what
+// makes a cold offline launch actually open instead of the browser's dino page.
+const APP_SHELL = './index.html';
 
 // The OCR engine (~13 MB). Deliberately kept out of the install precache so
 // plain web visitors don't pay for it up front. Warmed on demand only when the
@@ -29,12 +47,16 @@ const ocrAssets = [
     './ocr/vendor/lang/chi_tra.traineddata.gz'
 ];
 
-// 安裝 Service Worker 並緩存資源
+// 安裝 Service Worker:先原子性快取 app shell(缺一不可),再盡力補快取次要資源
+// (單張失敗也不影響 shell),最後 skipWaiting 讓新版立即接手。
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(urlsToCache))
-            .then(() => self.skipWaiting())
+        caches.open(CACHE_NAME).then(cache =>
+            cache.addAll(shellAssets).then(() => {
+                // best-effort、不 await:不讓 2.3MB 插圖拖住或拖垮 shell 快取
+                extraAssets.forEach(url => cache.add(url).catch(() => {}));
+            })
+        ).then(() => self.skipWaiting())
     );
 });
 
@@ -90,6 +112,13 @@ self.addEventListener('fetch', event => {
                 caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
             }
             return networkResponse;
-        }).catch(() => caches.match(event.request))
+        }).catch(() => caches.match(event.request).then(cached => {
+            // Navigations that miss (offline cold launch of a start_url we
+            // didn't cache under that exact key) fall back to the app shell so
+            // the app still opens; other misses just fail as before.
+            if (cached) return cached;
+            if (event.request.mode === 'navigate') return caches.match(APP_SHELL);
+            return undefined;
+        }))
     );
 });
