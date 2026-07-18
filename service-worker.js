@@ -1,8 +1,11 @@
-const CACHE_NAME = 'microwave-time-converter-v5';
+const CACHE_NAME = 'microwave-time-converter-v6';
 const urlsToCache = [
     './',
     './index.html',
     './app.js',
+    './vendor/tailwind.js',
+    './fonts/nunito-latin.woff2',
+    './fonts/nunito-latin-ext.woff2',
     './empty-state-illustration.png',
     './fav64.png',
     './mw512.png',
@@ -10,6 +13,20 @@ const urlsToCache = [
     './manifest.json',
     './ocr/mw-parse.js',
     './ocr/ocr.js'
+];
+
+// The OCR engine (~13 MB). Deliberately kept out of the install precache so
+// plain web visitors don't pay for it up front. Warmed on demand only when the
+// app runs as an installed PWA (page posts { type: 'WARM_OCR' }), so installed
+// users — who expect offline to just work — have it ready. Both wasm cores are
+// listed because which one Tesseract picks (SIMD vs not) is decided at runtime.
+const ocrAssets = [
+    './ocr/vendor/tesseract.min.js',
+    './ocr/vendor/worker.min.js',
+    './ocr/vendor/tesseract-core-simd-lstm.wasm.js',
+    './ocr/vendor/tesseract-core-lstm.wasm.js',
+    './ocr/vendor/lang/eng.traineddata.gz',
+    './ocr/vendor/lang/chi_tra.traineddata.gz'
 ];
 
 // 安裝 Service Worker 並緩存資源
@@ -30,9 +47,23 @@ self.addEventListener('activate', event => {
     );
 });
 
+// 收到頁面的 WARM_OCR 訊息時,把 OCR 大檔補進快取(逐一檢查,缺的才抓,已快取
+// 則幾乎零成本,可安全在每次啟動呼叫)。只有以 PWA 形態執行時頁面才會發此訊息。
+self.addEventListener('message', event => {
+    if (!event.data || event.data.type !== 'WARM_OCR') return;
+    event.waitUntil(
+        caches.open(CACHE_NAME).then(cache => Promise.all(
+            ocrAssets.map(url => cache.match(url).then(hit => {
+                if (hit) return;
+                return fetch(url).then(res => res.ok && cache.put(url, res));
+            }))
+        ))
+    );
+});
+
 // 快取策略:
-// - ocr/vendor/ 底下的大檔(~13MB)採快取優先,且不預先快取——使用者第一次
-//   啟用拍照辨識、實際下載時才寫入,之後離線可用,也不拖慢一般人的首次載入。
+// - ocr/vendor/ 底下的大檔(~13MB)採快取優先。網頁訪客第一次啟用拍照辨識、實際
+//   下載時才寫入;安裝成 PWA 者則由上面的 WARM_OCR 預先備妥。兩種情況之後都離線可用。
 // - 其他資源(HTML、JS 等)採網路優先、失敗才回快取。若採快取優先,部署新版後
 //   舊訪客會永遠拿到快取裡的舊頁面。
 self.addEventListener('fetch', event => {
