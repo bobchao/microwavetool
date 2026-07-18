@@ -1,8 +1,10 @@
-const CACHE_NAME = 'microwave-time-converter-v5';
+const CACHE_NAME = 'microwave-time-converter-v6';
 const urlsToCache = [
     './',
     './index.html',
     './app.js',
+    './i18n/zh-Hant.js',
+    './i18n/ja.js',
     './empty-state-illustration.png',
     './fav64.png',
     './mw512.png',
