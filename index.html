@@ -73,6 +73,27 @@
         <div class="font-semibold text-[12.5px] leading-[1.45] text-[#8a5a26]" data-i18n="estimateWarning">Couldn't read the package power, so I assumed 700 W — typical for a home meal. Change it below if yours is different.</div>
       </div>
 
+      <!-- Suggestion slot. Shown only alongside a result (the moment the user
+           has an answer and is about to go and heat something) and only while
+           online, so an installed PWA used offline never shows an empty frame.
+           Dummy content for now — this is where a contextual, clearly-labelled
+           product suggestion will go. Plain markup and a self-hosted inline
+           icon: no third-party script, no tracker, nothing for the service
+           worker to special-case. min-h on the card reserves the height so
+           the layout doesn't shift when it appears. -->
+      <div id="suggest-slot" class="hidden mt-[22px]">
+        <div class="font-extrabold text-[11px] uppercase tracking-[.08em] text-[#a89a86] mb-2.5" data-i18n="suggestLabel">Suggested</div>
+        <div class="border-[1.5px] border-dashed border-[#e0cfae] rounded-[18px] px-[15px] py-[13px] flex items-center gap-[13px] min-h-[76px]">
+          <div class="w-[46px] h-[46px] rounded-[12px] bg-[#f0e8d8] flex-none flex items-center justify-center">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#b3a180" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16l-1.2 9.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8z"></path><rect x="2.8" y="5.6" width="18.4" height="3.4" rx="1.2"></rect></svg>
+          </div>
+          <div class="min-w-0">
+            <div class="font-extrabold text-[13.5px] leading-tight text-[#6b5f50]" data-i18n="suggestTitle">Microwave-safe container</div>
+            <div class="font-semibold text-[11.5px] leading-[1.45] text-[#b3a180] mt-0.5" data-i18n="suggestNote">Placeholder — a related product suggestion will appear here.</div>
+          </div>
+        </div>
+      </div>
+
       <div id="recents-section" class="hidden">
         <div class="font-extrabold text-[11px] uppercase tracking-[.08em] text-[#a89a86] mt-[22px] mb-2.5" data-i18n="lastCooks">Last 2 cooks</div>
         <div id="recents-list"></div>

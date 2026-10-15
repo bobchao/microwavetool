@@ -28,6 +28,9 @@
             emptyTitle: 'How long in your microwave?',
             emptySubtitle: 'Scan the package or enter it below',
             estimateWarning: "Couldn't read the package power, so I assumed 700 W — typical for a home meal. Change it below if yours is different.",
+            suggestLabel: 'Suggested',
+            suggestTitle: 'Microwave-safe container',
+            suggestNote: 'Placeholder — a related product suggestion will appear here.',
             lastCooks: 'Last 2 cooks',
             fromPackage: 'From the package',
             typeOrScan: 'type or scan',
@@ -139,6 +142,7 @@
         resultCaption: document.getElementById('result-caption'),
         emptyState: document.getElementById('empty-state'),
         estimateWarning: document.getElementById('estimate-warning'),
+        suggestSlot: document.getElementById('suggest-slot'),
         recentsSection: document.getElementById('recents-section'),
         recentsList: document.getElementById('recents-list'),
         powerRowLabel: document.getElementById('power-row-label'),
@@ -238,6 +242,10 @@
 
         els.estimateWarning.classList.toggle('hidden', !state.isEstimate);
         els.powerRowLabel.textContent = state.isEstimate ? t('powerAssumed') : t('power');
+
+        // Only alongside a result, and only online — offline the slot has
+        // nothing to show, and an empty frame is worse than no frame.
+        els.suggestSlot.classList.toggle('hidden', !(c.can && navigator.onLine));
 
         // Skip re-writing the field the user is actively typing in, so the
         // cursor doesn't jump around.
@@ -366,6 +374,13 @@
         render();
         renderOvenSheet();
     });
+
+    // --- Connectivity ---
+    // The suggestion slot is the only part of the UI that depends on being
+    // online, so re-render when that changes rather than leaving a stale frame
+    // behind when an installed PWA drops its connection mid-use.
+    window.addEventListener('online', render);
+    window.addEventListener('offline', render);
 
     // --- Package fields (live calculation) ---
     els.pkgWatt.addEventListener('input', e => {
